@@ -25,25 +25,129 @@
   <style>
     body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background-color: #f0f4f8; font-family: 'Inter', sans-serif; }
     #app-frame { width: 100%; height: 100%; border: none; display: none; }
-    #loader { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; }
-    .spinner { width: 45px; height: 45px; border: 4px solid #e2e8f0; border-top: 4px solid #10b981; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    .loading-text { color: #64748b; font-size: 15px; font-weight: 500; }
+    
+    /* --- MÀN HÌNH CHỜ KHỞI ĐỘNG (SPLASH SCREEN TRÀN VIỀN MOBILE) --- */
+    #appSplashScreen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: url('https://live.staticflickr.com/65535/55338870733_2c3694c8f3_b.jpg') no-repeat center center;
+        background-size: cover;
+        z-index: 99999;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        align-items: center;
+        padding-bottom: 80px;
+        box-sizing: border-box;
+        transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+    }
+    .splash-content { width: 100%; display: flex; flex-direction: column; align-items: center; }
+    .splash-logo { text-align: center; margin-bottom: 35vh; }
+    .splash-title {
+        font-size: 38px; font-weight: 800; color: #f59e0b; margin: 0;
+        text-shadow: 0 4px 8px rgba(0,0,0,0.7); letter-spacing: 2px;
+    }
+    .splash-subtitle {
+        font-size: 26px; font-weight: 700; color: #ffffff; margin: 5px 0 0 0;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.7);
+    }
+    .splash-tip {
+        color: #e2e8f0; font-size: 13px; text-align: center; max-width: 85%;
+        margin-bottom: 25px; line-height: 1.5; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+        background: rgba(15, 23, 42, 0.65); padding: 8px 16px; border-radius: 20px;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+    .progress-container {
+        position: relative; width: 85%; max-width: 350px; height: 22px;
+        background: rgba(0, 0, 0, 0.6); border: 2px solid #64748b;
+        border-radius: 11px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.6);
+    }
+    .progress-bar-fill {
+        width: 0%; height: 100%;
+        background: linear-gradient(90deg, #f59e0b 0%, #ef4444 100%);
+        border-radius: 9px; transition: width 0.1s linear; position: relative;
+    }
+    .progress-bar-fill::after {
+        content: '🦆'; position: absolute; right: -14px; top: 50%;
+        transform: translateY(-50%); font-size: 24px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+    }
+    .progress-text {
+        position: absolute; width: 100%; text-align: center; top: 50%; left: 0;
+        transform: translateY(-50%); color: #ffffff; font-size: 12px; font-weight: 800;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9);
+    }
+    .splash-version {
+        position: absolute; bottom: 15px; color: #cbd5e1; font-size: 11px;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+    }
   </style>
 </head>
 <body>
 
-  <div id="loader">
-    <div class="spinner"></div>
-    <div class="loading-text">Đang kết nối hệ thống...</div>
+  <div id="appSplashScreen">
+    <div class="splash-content">
+      <div class="splash-logo">
+        <h1 class="splash-title">THỜI ĐẠI</h1>
+        <h2 class="splash-subtitle">PHÙ SA FARM</h2>
+      </div>
+      
+      <div class="splash-tip">
+        Tấn công dữ liệu? Hãy nghĩ kỹ nhé — hệ thống sẽ khóa an toàn nếu có thao tác trùng lặp.
+      </div>
+  
+      <div class="progress-container">
+        <div id="splashProgressBar" class="progress-bar-fill"></div>
+        <span id="splashProgressText" class="progress-text">0%</span>
+      </div>
+      
+      <div class="splash-version">Phiên bản 1.106.9_v2026</div>
+    </div>
   </div>
 
   <iframe id="app-frame" src="https://script.google.com/macros/s/AKfycbwVUdBb0uX8V6fe9fwogoM4RCztKY3_x91gfrA_9eqaoTVbtIeJ4QhjC4SkqFft89bj/exec" onload="hideLoader()"></iframe>
 
   <script>
+    const progressBar = document.getElementById('splashProgressBar');
+    const progressText = document.getElementById('splashProgressText');
+    const splashScreen = document.getElementById('appSplashScreen');
+    const appFrame = document.getElementById('app-frame');
+    
+    let currentPercent = 0;
+    
+    // Tự động chạy giả lập thanh tiến trình lên mức 80% trong lúc Iframe đang gọi dữ liệu ngầm
+    const interval = setInterval(() => {
+      if (currentPercent < 80) {
+        currentPercent += Math.floor(Math.random() * 3) + 1; // Tăng ngẫu nhiên từ 1-3%
+        if (currentPercent > 80) currentPercent = 80;
+        
+        progressBar.style.width = currentPercent + '%';
+        progressText.innerText = currentPercent + '%';
+      }
+    }, 100);
+
+    // Kích hoạt khi Iframe đã tải xong 100% dữ liệu từ Server Google
     function hideLoader() {
-      document.getElementById('loader').style.display = 'none';
-      document.getElementById('app-frame').style.display = 'block';
+      clearInterval(interval);
+      
+      // Ép thanh tiến trình nhảy vọt lên 100%
+      currentPercent = 100;
+      progressBar.style.width = '100%';
+      progressText.innerText = '100%';
+      
+      // Chờ 400ms để người dùng kịp nhìn thấy con số 100% rồi mới mờ dần
+      setTimeout(() => {
+        splashScreen.style.opacity = '0';
+        splashScreen.style.visibility = 'hidden';
+        appFrame.style.display = 'block'; // Hiển thị App chính lên
+        
+        // Dọn dẹp DOM giải phóng bộ nhớ cho di động sau khi hiệu ứng mờ kết thúc
+        setTimeout(() => { 
+            splashScreen.remove(); 
+        }, 500);
+      }, 400);
     }
   </script>
 </body>
