@@ -89,13 +89,9 @@
 
   <div id="appSplashScreen">
     <div class="splash-content">
-      <div class="splash-logo">
-        <h1 class="splash-title">THỜI ĐẠI</h1>
-        <h2 class="splash-subtitle">PHÙ SA FARM</h2>
-      </div>
-      
+     
       <div class="splash-tip">
-        Tấn công dữ liệu? Hãy nghĩ kỹ nhé — hệ thống sẽ khóa an toàn nếu có thao tác trùng lặp.
+        Phần mềm quản lý xuất vịt của Phù Sa Farm.
       </div>
   
       <div class="progress-container">
@@ -103,11 +99,11 @@
         <span id="splashProgressText" class="progress-text">0%</span>
       </div>
       
-      <div class="splash-version">Phiên bản 1.106.9_v2026</div>
+      <div class="splash-version">Phiên bản Gas_Github_16062026</div>
     </div>
   </div>
 
-  <iframe id="app-frame" src="https://script.google.com/macros/s/AKfycbwVUdBb0uX8V6fe9fwogoM4RCztKY3_x91gfrA_9eqaoTVbtIeJ4QhjC4SkqFft89bj/exec" onload="hideLoader()"></iframe>
+  <iframe id="app-frame" src="https://script.google.com/macros/s/AKfycbwVUdBb0uX8V6fe9fwogoM4RCztKY3_x91gfrA_9eqaoTVbtIeJ4QhjC4SkqFft89bj/exec"></iframe>
 
   <script>
     const progressBar = document.getElementById('splashProgressBar');
@@ -117,37 +113,42 @@
     
     let currentPercent = 0;
     
-    // Tự động chạy giả lập thanh tiến trình lên mức 80% trong lúc Iframe đang gọi dữ liệu ngầm
+    // Tự động chạy giả lập thanh tiến trình lên mức 85% trong lúc chờ GAS tải dữ liệu
     const interval = setInterval(() => {
-      if (currentPercent < 80) {
-        currentPercent += Math.floor(Math.random() * 3) + 1; // Tăng ngẫu nhiên từ 1-3%
-        if (currentPercent > 80) currentPercent = 80;
+      if (currentPercent < 85) {
+        currentPercent += Math.floor(Math.random() * 3) + 1; 
+        if (currentPercent > 85) currentPercent = 85;
         
         progressBar.style.width = currentPercent + '%';
         progressText.innerText = currentPercent + '%';
       }
     }, 100);
 
-    // Kích hoạt khi Iframe đã tải xong 100% dữ liệu từ Server Google
-    function hideLoader() {
+    // LẮNG NGHE TÍN HIỆU TỪ GOOGLE APPS SCRIPT
+    window.addEventListener('message', function(event) {
+        // Nếu nhận đúng tín hiệu 'APP_READY' từ App bên trong
+        if (event.data && event.data.type === 'APP_READY') {
+            finishLoading();
+        }
+    });
+
+    // Hàm kết thúc Loading
+    function finishLoading() {
       clearInterval(interval);
       
       // Ép thanh tiến trình nhảy vọt lên 100%
-      currentPercent = 100;
       progressBar.style.width = '100%';
       progressText.innerText = '100%';
       
-      // Chờ 400ms để người dùng kịp nhìn thấy con số 100% rồi mới mờ dần
+      // Chờ 300ms để hiệu ứng thanh kéo dài mượt mà, sau đó ẩn màn hình chờ
       setTimeout(() => {
         splashScreen.style.opacity = '0';
         splashScreen.style.visibility = 'hidden';
-        appFrame.style.display = 'block'; // Hiển thị App chính lên
+        appFrame.style.display = 'block'; // Mở Iframe lên
         
-        // Dọn dẹp DOM giải phóng bộ nhớ cho di động sau khi hiệu ứng mờ kết thúc
-        setTimeout(() => { 
-            splashScreen.remove(); 
-        }, 500);
-      }, 400);
+        // Dọn dẹp DOM
+        setTimeout(() => { splashScreen.remove(); }, 500);
+      }, 300);
     }
   </script>
 </body>
